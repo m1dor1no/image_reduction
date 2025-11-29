@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>画像一括リサイズツール (長辺500px)</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <!-- Google Fonts: IBM Plex Sans JP -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+JP:wght@500&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: "IBM Plex Sans JP", sans-serif;
+            font-weight: 500;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f7;
+            color: #333;
+        }
+
+        h1 {
+            text-align: center;
+            color: #1d1d1f;
+        }
+
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+
+        .upload-area {
+            border: 2px dashed #ccc;
+            padding: 40px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            cursor: pointer;
+            transition: border-color 0.3s;
+        }
+
+        .upload-area:hover {
+            border-color: #0071e3;
+        }
+
+        input[type="file"] {
+            display: none;
+        }
+
+        .btn {
+            background-color: #0071e3;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 24px;
+            border: none;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            text-decoration: none;
+            display: inline-block;
+            margin-top: 10px;
+        }
+
+        .btn:hover {
+            background-color: #0077ed;
+        }
+
+        .btn:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+
+        #status-area {
+            margin-top: 30px;
+            display: none;
+        }
+
+        .file-list {
+            text-align: left;
+            margin: 20px 0;
+            max-height: 200px;
+            overflow-y: auto;
+            border: 1px solid #eee;
+            padding: 10px;
+            border-radius: 4px;
+        }
+
+        .file-item {
+            padding: 5px;
+            border-bottom: 1px solid #f0f0f0;
+            font-size: 14px;
+        }
+
+        .progress {
+            color: #0071e3;
+            font-weight: bold;
+        }
+    </style>
+</head>
+
+<body>
+
+    <h1>画像一括リサイズツール</h1>
+    <div class="container">
+        <p>複数の画像をアップロードすると、長辺が500pxになるように一括リサイズします。<br>完了するとZIPファイルとしてダウンロードできます。変更は反映されていますか？</p>
+
+        <div class="upload-area" onclick="document.getElementById('fileInput').click()">
+            <p>クリックして画像を選択 (複数選択可)</p>
+            <input type="file" id="fileInput" accept="image/*" multiple>
+        </div>
+
+        <div id="status-area">
+            <h2>処理状況</h2>
+            <div class="file-list" id="fileList"></div>
+            <p class="progress" id="progressText"></p>
+            <button id="downloadBtn" class="btn" style="display: none;">ZIPをダウンロード</button>
+        </div>
+    </div>
+
+    <script>
+        const fileInput = document.getElementById('fileInput');
+        const statusArea = document.getElementById('status-area');
+        const fileList = document.getElementById('fileList');
+        const progressText = document.getElementById('progressText');
+        const downloadBtn = document.getElementById('downloadBtn');
+
+        let zipBlob = null;
+
+        fileInput.addEventListener('change', async function (e) {
+            const files = Array.from(e.target.files);
+            if (files.length === 0) return;
+
+            // UI Reset
+            statusArea.style.display = 'block';
+            fileList.innerHTML = '';
+            progressText.textContent = '処理中...';
+            downloadBtn.style.display = 'none';
+            zipBlob = null;
+
+            const zip = new JSZip();
+            const folder = zip.folder("resized_images");
+
+            let processedCount = 0;
+
+            for (const file of files) {
+                try {
+                    const resizedDataUrl = await resizeImage(file);
+                    // Remove header "data:image/jpeg;base64,"
+                    const base64Data = resizedDataUrl.split(',')[1];
+
+                    // Create filename
+                    const originalName = file.name.split('.')[0];
+                    const newName = `resized_${originalName}.jpg`;
+
+                    folder.file(newName, base64Data, { base64: true });
+
+                    // Update UI
+                    const item = document.createElement('div');
+                    item.className = 'file-item';
+                    item.textContent = `✅ ${file.name} -> ${newName}`;
+                    fileList.appendChild(item);
+
+                } catch (err) {
+                    console.error(err);
+                    const item = document.createElement('div');
+                    item.className = 'file-item';
+                    item.style.color = 'red';
+                    item.textContent = `❌ ${file.name}: エラー`;
+                    fileList.appendChild(item);
+                }
+
+                processedCount++;
+                progressText.textContent = `処理中... (${processedCount}/${files.length})`;
+            }
+
+            // Generate ZIP
+            progressText.textContent = 'ZIPファイルを作成中...';
+            zipBlob = await zip.generateAsync({ type: "blob" });
+
+            progressText.textContent = '完了しました！';
+            downloadBtn.style.display = 'inline-block';
+
+            // Reset input so same files can be selected again
+            fileInput.value = '';
+        });
+
+        downloadBtn.addEventListener('click', function () {
+            if (!zipBlob) return;
+            const url = URL.createObjectURL(zipBlob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'resized_images.zip';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        });
+
+        function resizeImage(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = function (event) {
+                    const img = new Image();
+                    img.onload = function () {
+                        const targetSize = 500;
+                        let newWidth, newHeight;
+
+                        // Calculate dimensions (Long edge = 500)
+                        if (img.width > img.height) {
+                            newWidth = targetSize;
+                            newHeight = Math.round(img.height * (targetSize / img.width));
+                        } else {
+                            newHeight = targetSize;
+                            newWidth = Math.round(img.width * (targetSize / img.height));
+                        }
+
+                        // Step-down resizing logic
+                        let curCanvas = document.createElement('canvas');
+                        let curCtx = curCanvas.getContext('2d');
+                        curCanvas.width = img.width;
+                        curCanvas.height = img.height;
+                        curCtx.drawImage(img, 0, 0);
+
+                        let curWidth = img.width;
+                        let curHeight = img.height;
+
+                        // Use step-down if shrinking significantly (more than 2x)
+                        while (curWidth * 0.5 > newWidth && curHeight * 0.5 > newHeight) {
+                            curWidth = Math.floor(curWidth * 0.5);
+                            curHeight = Math.floor(curHeight * 0.5);
+
+                            let tempCanvas = document.createElement('canvas');
+                            tempCanvas.width = curWidth;
+                            tempCanvas.height = curHeight;
+                            let tempCtx = tempCanvas.getContext('2d');
+                            tempCtx.drawImage(curCanvas, 0, 0, curWidth, curHeight);
+
+                            curCanvas = tempCanvas;
+                            curCtx = tempCtx;
+                        }
+
+                        // Final resize
+                        const canvas = document.createElement('canvas');
+                        canvas.width = newWidth;
+                        canvas.height = newHeight;
+                        const ctx = canvas.getContext('2d');
+                        ctx.imageSmoothingEnabled = true;
+                        ctx.imageSmoothingQuality = 'high';
+                        ctx.drawImage(curCanvas, 0, 0, newWidth, newHeight);
+
+                        resolve(canvas.toDataURL('image/jpeg', 0.9));
+                    };
+                    img.onerror = reject;
+                    img.src = event.target.result;
+                };
+                reader.onerror = reject;
+                reader.readAsDataURL(file);
+            });
+        }
+    </script>
+</body>
+
+</html>
