@@ -9,129 +9,148 @@
     <!-- Google Fonts: IBM Plex Sans JP -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+JP:wght@500&display=swap" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+JP:wght@500&family=M+PLUS+Rounded+1c:wght@500;800&display=swap"
+        rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@400;700;800&display=swap"
+        rel="stylesheet">
     <style>
         :root {
-            --primary-color: #FF9F1C;
-            --primary-gradient: linear-gradient(135deg, #FF9F1C 0%, #FF4E50 100%);
-            --secondary-color: #2EC4B6;
-            --bg-gradient: linear-gradient(135deg, #FFF6E5 0%, #FFE3E3 50%, #E0F7FA 100%);
-            --glass-bg: rgba(255, 255, 255, 0.75);
-            --glass-border: 1px solid rgba(255, 255, 255, 0.8);
+            --primary-color: #00A388;
+            /* Asia Univ Green-ish */
+            --secondary-color: #FF6B6B;
+            /* Festival Red/Pink */
+            --accent-color: #FFD93D;
+            /* Pop Yellow */
+            --bg-color: #FFFFFF;
             --text-color: #333;
-            --shadow-sm: 0 4px 6px rgba(0, 0, 0, 0.05);
-            --shadow-md: 0 10px 30px rgba(0, 0, 0, 0.1);
+            --shadow-pop: 4px 4px 0px rgba(0, 0, 0, 0.1);
         }
 
         body {
-            font-family: "IBM Plex Sans JP", sans-serif;
+            font-family: "M PLUS Rounded 1c", "IBM Plex Sans JP", sans-serif;
             font-weight: 500;
             margin: 0;
             padding: 40px 20px;
-            background: var(--bg-gradient);
+            background-color: var(--bg-color);
+            background-image: radial-gradient(#FFD93D 20%, transparent 20%), radial-gradient(#FF6B6B 20%, transparent 20%);
+            background-size: 50px 50px;
+            background-position: 0 0, 25px 25px;
             color: var(--text-color);
             min-height: 100vh;
             box-sizing: border-box;
-            background-attachment: fixed;
             position: relative;
             overflow-x: hidden;
         }
 
-        /* Background Decorations */
-        .bg-circle {
+        /* Confetti Decorations */
+        .confetti {
             position: fixed;
-            border-radius: 50%;
-            filter: blur(80px);
+            width: 15px;
+            height: 15px;
+            background-color: var(--primary-color);
+            animation: fall linear infinite;
             z-index: -1;
-            opacity: 0.6;
-            animation: float 20s infinite ease-in-out;
         }
 
-        .circle-1 {
-            width: 500px;
-            height: 500px;
-            background: #FFD166;
-            top: -150px;
-            right: -150px;
-            animation-delay: 0s;
+        .c1 {
+            left: 10%;
+            animation-duration: 4s;
+            background-color: var(--secondary-color);
+            transform: rotate(15deg);
         }
 
-        .circle-2 {
-            width: 400px;
-            height: 400px;
-            background: #2EC4B6;
-            bottom: -100px;
-            left: -100px;
-            animation-delay: -5s;
+        .c2 {
+            left: 30%;
+            animation-duration: 6s;
+            background-color: var(--accent-color);
+            border-radius: 50%;
         }
 
-        .circle-3 {
-            width: 300px;
-            height: 300px;
-            background: #FF9F1C;
-            top: 40%;
-            left: 20%;
-            opacity: 0.4;
-            animation-delay: -10s;
+        .c3 {
+            left: 50%;
+            animation-duration: 5s;
+            background-color: var(--primary-color);
+            transform: rotate(-30deg);
         }
 
-        @keyframes float {
+        .c4 {
+            left: 70%;
+            animation-duration: 7s;
+            background-color: var(--secondary-color);
+            border-radius: 50%;
+        }
 
-            0%,
-            100% {
-                transform: translate(0, 0);
+        .c5 {
+            left: 90%;
+            animation-duration: 4.5s;
+            background-color: var(--accent-color);
+            transform: rotate(45deg);
+        }
+
+        @keyframes fall {
+            0% {
+                top: -10%;
+                transform: translateY(0) rotate(0deg);
+                opacity: 1;
             }
 
-            50% {
-                transform: translate(30px, -30px);
+            100% {
+                top: 110%;
+                transform: translateY(100vh) rotate(360deg);
+                opacity: 0;
             }
         }
 
         h1 {
             text-align: center;
-            color: #1d1d1f;
-            font-weight: 700;
+            color: var(--primary-color);
+            font-weight: 800;
             margin-bottom: 30px;
-            text-shadow: 0 2px 4px rgba(255, 255, 255, 0.5);
-            letter-spacing: 0.05em;
+            background: white;
+            display: inline-block;
+            padding: 10px 30px;
+            border-radius: 50px;
+            box-shadow: var(--shadow-pop);
+            border: 3px solid var(--primary-color);
+            position: relative;
+            left: 50%;
+            transform: translateX(-50%);
         }
 
         .container {
             max-width: 800px;
             margin: 0 auto;
-            background: var(--glass-bg);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
+            background: white;
             padding: 40px;
-            border-radius: 24px;
-            box-shadow: var(--shadow-md);
-            border: var(--glass-border);
+            border-radius: 30px;
+            box-shadow: 8px 8px 0px rgba(0, 0, 0, 0.1);
+            border: 4px solid var(--primary-color);
             text-align: center;
+            position: relative;
         }
 
         .upload-area {
-            border: 3px dashed #FFD166;
-            background: rgba(255, 255, 255, 0.5);
+            border: 4px dashed var(--accent-color);
+            background: #FFFBE6;
             padding: 50px;
-            border-radius: 16px;
+            border-radius: 20px;
             margin-bottom: 30px;
             cursor: pointer;
-            transition: all 0.3s ease;
-            position: relative;
-            overflow: hidden;
+            transition: all 0.2s ease;
         }
 
         .upload-area:hover {
-            border-color: var(--primary-color);
-            background: rgba(255, 255, 255, 0.8);
-            transform: translateY(-2px);
-            box-shadow: var(--shadow-sm);
+            border-color: var(--secondary-color);
+            background: #FFF0F0;
+            transform: scale(1.02);
         }
 
         .upload-area p {
-            color: #666;
+            color: #555;
             font-size: 1.1em;
             margin: 0;
+            font-weight: 700;
         }
 
         input[type="file"] {
@@ -139,25 +158,25 @@
         }
 
         .btn {
-            background: var(--primary-gradient);
+            background: var(--secondary-color);
             color: white;
-            padding: 14px 32px;
+            padding: 15px 40px;
             border-radius: 50px;
-            border: none;
-            font-size: 16px;
-            font-weight: bold;
+            border: 3px solid white;
+            font-size: 18px;
+            font-weight: 800;
             cursor: pointer;
-            transition: all 0.3s ease;
+            transition: all 0.2s ease;
             text-decoration: none;
             display: inline-block;
             margin-top: 20px;
-            box-shadow: 0 4px 15px rgba(255, 78, 80, 0.3);
-            letter-spacing: 0.05em;
+            box-shadow: 0 4px 10px rgba(255, 107, 107, 0.4);
         }
 
         .btn:hover {
-            transform: translateY(-2px) scale(1.02);
-            box-shadow: 0 6px 20px rgba(255, 78, 80, 0.4);
+            transform: translateY(-3px);
+            box-shadow: 0 6px 15px rgba(255, 107, 107, 0.6);
+            background: #FF5252;
         }
 
         .btn:disabled {
@@ -174,9 +193,9 @@
         }
 
         #status-area h2 {
-            font-size: 1.2em;
-            color: var(--secondary-color);
-            border-bottom: 2px solid var(--secondary-color);
+            font-size: 1.3em;
+            color: var(--primary-color);
+            border-bottom: 3px dashed var(--primary-color);
             padding-bottom: 10px;
             margin-bottom: 20px;
             display: inline-block;
@@ -190,53 +209,53 @@
         }
 
         .file-item {
-            background: white;
+            background: #F0FDF4;
             padding: 12px 20px;
-            border-radius: 12px;
+            border-radius: 15px;
             margin-bottom: 10px;
-            box-shadow: var(--shadow-sm);
+            border: 2px solid #BBF7D0;
             display: flex;
             align-items: center;
             font-size: 14px;
-            transition: transform 0.2s;
-        }
-
-        .file-item:hover {
-            transform: translateX(5px);
+            color: #15803D;
+            font-weight: bold;
         }
 
         .progress {
             color: var(--primary-color);
-            font-weight: bold;
+            font-weight: 800;
             text-align: center;
             margin: 20px 0;
+            font-size: 1.1em;
         }
 
         /* Custom Scrollbar */
         ::-webkit-scrollbar {
-            width: 8px;
+            width: 10px;
         }
 
         ::-webkit-scrollbar-track {
-            background: rgba(0, 0, 0, 0.05);
-            border-radius: 4px;
+            background: #f1f1f1;
+            border-radius: 5px;
         }
 
         ::-webkit-scrollbar-thumb {
-            background: #ccc;
-            border-radius: 4px;
+            background: var(--primary-color);
+            border-radius: 5px;
         }
 
         ::-webkit-scrollbar-thumb:hover {
-            background: #bbb;
+            background: #008f75;
         }
     </style>
 </head>
 
 <body>
-    <div class="bg-circle circle-1"></div>
-    <div class="bg-circle circle-2"></div>
-    <div class="bg-circle circle-3"></div>
+    <div class="confetti c1"></div>
+    <div class="confetti c2"></div>
+    <div class="confetti c3"></div>
+    <div class="confetti c4"></div>
+    <div class="confetti c5"></div>
 
     <h1>画像一括リサイズツール</h1>
     <div class="container">
