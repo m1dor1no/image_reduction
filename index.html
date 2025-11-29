@@ -128,7 +128,8 @@
         const progressText = document.getElementById('progressText');
         const downloadBtn = document.getElementById('downloadBtn');
 
-        let zipBlob = null;
+        let downloadBlob = null;
+        let isZip = false;
 
         fileInput.addEventListener('change', async function (e) {
             const files = Array.from(e.target.files);
@@ -139,22 +140,28 @@
             fileList.innerHTML = '';
             progressText.textContent = '処理中...';
             downloadBtn.style.display = 'none';
-            zipBlob = null;
+            downloadBlob = null;
+            isZip = false;
 
             const zip = new JSZip();
             const folder = zip.folder("resized_images");
 
             let processedCount = 0;
+            let lastResizedDataUrl = null;
+            let lastNewName = null;
 
             for (const file of files) {
                 try {
                     const resizedDataUrl = await resizeImage(file);
+                    lastResizedDataUrl = resizedDataUrl;
+
                     // Remove header "data:image/jpeg;base64,"
                     const base64Data = resizedDataUrl.split(',')[1];
 
                     // Create filename
                     const originalName = file.name.split('.')[0];
                     const newName = `resized_${originalName}.jpg`;
+                    lastNewName = newName;
 
                     folder.file(newName, base64Data, { base64: true });
 
@@ -177,11 +184,34 @@
                 progressText.textContent = `処理中... (${processedCount}/${files.length})`;
             }
 
-            // Generate ZIP
-            progressText.textContent = 'ZIPファイルを作成中...';
-            zipBlob = await zip.generateAsync({ type: "blob" });
+            if (files.length === 1 && lastResizedDataUrl) {
+                // Single file: Download directly
+                progressText.textContent = '完了しました！';
 
-            progressText.textContent = '完了しました！';
+                // Convert Base64 to Blob
+                const byteString = atob(lastResizedDataUrl.split(',')[1]);
+                const mimeString = lastResizedDataUrl.split(',')[0].split(':')[1].split(';')[0];
+                const ab = new ArrayBuffer(byteString.length);
+                const ia = new Uint8Array(ab);
+                for (let i = 0; i < byteString.length; i++) {
+                    ia[i] = byteString.charCodeAt(i);
+                }
+                downloadBlob = new Blob([ab], { type: mimeString });
+
+                downloadBtn.textContent = '画像をダウンロード';
+                downloadBtn.dataset.filename = lastNewName;
+                isZip = false;
+            } else {
+                // Multiple files: Download ZIP
+                progressText.textContent = 'ZIPファイルを作成中...';
+                downloadBlob = await zip.generateAsync({ type: "blob" });
+
+                progressText.textContent = '完了しました！';
+                downloadBtn.textContent = 'ZIPをダウンロード';
+                downloadBtn.dataset.filename = 'resized_images.zip';
+                isZip = true;
+            }
+
             downloadBtn.style.display = 'inline-block';
 
             // Reset input so same files can be selected again
@@ -189,11 +219,11 @@
         });
 
         downloadBtn.addEventListener('click', function () {
-            if (!zipBlob) return;
-            const url = URL.createObjectURL(zipBlob);
+            if (!downloadBlob) return;
+            const url = URL.createObjectURL(downloadBlob);
             const a = document.createElement('a');
             a.href = url;
-            a.download = 'resized_images.zip';
+            a.download = this.dataset.filename || 'download';
             document.body.appendChild(a);
             a.click();
             document.body.removeChild(a);
