@@ -11,40 +11,75 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+JP:wght@500&display=swap" rel="stylesheet">
     <style>
+        :root {
+            --primary-color: #FF9F1C;
+            --primary-gradient: linear-gradient(135deg, #FF9F1C 0%, #FF4E50 100%);
+            --secondary-color: #2EC4B6;
+            --bg-gradient: linear-gradient(135deg, #fdfbfb 0%, #ebedee 100%);
+            --glass-bg: rgba(255, 255, 255, 0.85);
+            --glass-border: 1px solid rgba(255, 255, 255, 0.6);
+            --text-color: #333;
+            --shadow-sm: 0 4px 6px rgba(0, 0, 0, 0.05);
+            --shadow-md: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+
         body {
             font-family: "IBM Plex Sans JP", sans-serif;
             font-weight: 500;
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 20px;
-            background-color: #f5f5f7;
-            color: #333;
+            margin: 0;
+            padding: 40px 20px;
+            background: var(--bg-gradient);
+            color: var(--text-color);
+            min-height: 100vh;
+            box-sizing: border-box;
+            background-attachment: fixed;
         }
 
         h1 {
             text-align: center;
             color: #1d1d1f;
+            font-weight: 700;
+            margin-bottom: 30px;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+            letter-spacing: 0.05em;
         }
 
         .container {
-            background: white;
-            padding: 30px;
-            border-radius: 12px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            max-width: 800px;
+            margin: 0 auto;
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            padding: 40px;
+            border-radius: 24px;
+            box-shadow: var(--shadow-md);
+            border: var(--glass-border);
             text-align: center;
         }
 
         .upload-area {
-            border: 2px dashed #ccc;
-            padding: 40px;
-            border-radius: 8px;
-            margin-bottom: 20px;
+            border: 3px dashed #FFD166;
+            background: rgba(255, 255, 255, 0.5);
+            padding: 50px;
+            border-radius: 16px;
+            margin-bottom: 30px;
             cursor: pointer;
-            transition: border-color 0.3s;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
         }
 
         .upload-area:hover {
-            border-color: #0071e3;
+            border-color: var(--primary-color);
+            background: rgba(255, 255, 255, 0.8);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .upload-area p {
+            color: #666;
+            font-size: 1.1em;
+            margin: 0;
         }
 
         input[type="file"] {
@@ -52,52 +87,96 @@
         }
 
         .btn {
-            background-color: #0071e3;
+            background: var(--primary-gradient);
             color: white;
-            padding: 12px 24px;
-            border-radius: 24px;
+            padding: 14px 32px;
+            border-radius: 50px;
             border: none;
             font-size: 16px;
+            font-weight: bold;
             cursor: pointer;
-            transition: background-color 0.3s;
+            transition: all 0.3s ease;
             text-decoration: none;
             display: inline-block;
-            margin-top: 10px;
+            margin-top: 20px;
+            box-shadow: 0 4px 15px rgba(255, 78, 80, 0.3);
+            letter-spacing: 0.05em;
         }
 
         .btn:hover {
-            background-color: #0077ed;
+            transform: translateY(-2px) scale(1.02);
+            box-shadow: 0 6px 20px rgba(255, 78, 80, 0.4);
         }
 
         .btn:disabled {
-            background-color: #ccc;
+            background: #ccc;
             cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
         }
 
         #status-area {
-            margin-top: 30px;
+            margin-top: 40px;
             display: none;
+            text-align: left;
+        }
+
+        #status-area h2 {
+            font-size: 1.2em;
+            color: var(--secondary-color);
+            border-bottom: 2px solid var(--secondary-color);
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+            display: inline-block;
         }
 
         .file-list {
-            text-align: left;
             margin: 20px 0;
-            max-height: 200px;
+            max-height: 300px;
             overflow-y: auto;
-            border: 1px solid #eee;
-            padding: 10px;
-            border-radius: 4px;
+            padding: 5px;
         }
 
         .file-item {
-            padding: 5px;
-            border-bottom: 1px solid #f0f0f0;
+            background: white;
+            padding: 12px 20px;
+            border-radius: 12px;
+            margin-bottom: 10px;
+            box-shadow: var(--shadow-sm);
+            display: flex;
+            align-items: center;
             font-size: 14px;
+            transition: transform 0.2s;
+        }
+
+        .file-item:hover {
+            transform: translateX(5px);
         }
 
         .progress {
-            color: #0071e3;
+            color: var(--primary-color);
             font-weight: bold;
+            text-align: center;
+            margin: 20px 0;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.05);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #ccc;
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #bbb;
         }
     </style>
 </head>
